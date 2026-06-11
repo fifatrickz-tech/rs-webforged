@@ -215,29 +215,46 @@
       margin-left: 10px;
     }
 
-    /* ─── HAMBURGER (FIXED) ───────────────────── */
+    /* ─── HAMBURGER (FIXED + IMPROVED VISIBILITY) ───────────────────── */
 .nav-toggle {
   display: none;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 5px;
-  width: 40px;
-  height: 40px;
-  background: transparent;
-  border: 1px solid var(--line-md);
-  border-radius: 6px;
+
+  width: 44px;
+  height: 44px;
+
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+
   cursor: pointer;
-  z-index: 3001;
+  z-index: 4000;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .nav-toggle span {
   display: block;
-  width: 18px;
+  width: 20px;
   height: 2px;
+
   background: var(--white);
   border-radius: 2px;
+
   transition: 0.3s var(--ease);
+
+  /* IMPORTANT FIX */
+  margin: 0 auto;
+}
+
+/* hover = better affordance */
+.nav-toggle:hover {
+  border-color: rgba(108,99,255,0.5);
+  box-shadow: 0 0 0 3px rgba(108,99,255,0.15);
 }
 
 /* animation fix */
@@ -253,9 +270,15 @@
 
 /* MOBILE NAV FIX */
 @media (max-width: 900px) {
+
   .nav-toggle {
     display: flex;
   }
+.site-nav .nav-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 
   .site-nav {
     position: fixed;
@@ -268,24 +291,30 @@
     align-items: center;
     justify-content: center;
 
-    background: rgba(10, 10, 15, 0.98);
+    background: rgba(10,10,15,0.98);
     backdrop-filter: blur(25px);
 
     border-top: 1px solid var(--line);
 
     opacity: 0;
-    transform: translateY(-10px);
+    visibility: hidden;
     pointer-events: none;
 
-    transition: 0.35s var(--ease);
+    transform: translateY(-10px);
+
+    transition:
+      opacity .35s ease,
+      transform .35s ease,
+      visibility .35s ease;
 
     z-index: 3000;
   }
 
   .site-nav.open {
     opacity: 1;
-    transform: translateY(0);
+    visibility: visible;
     pointer-events: auto;
+    transform: translateY(0);
   }
 
   .site-nav a {
@@ -295,9 +324,13 @@
     max-width: 320px;
     text-align: center;
   }
+
+  .nav-cta {
+    margin-left: 0;
+    margin-top: 12px;
+  }
 }
 
-/* prevent scroll when menu open */
 body.menu-open {
   overflow: hidden;
 }
@@ -1292,7 +1325,7 @@ body.menu-open {
     /* ─── SCROLL REVEAL ─────────────────────────── */
     .reveal {
       opacity: 0;
-      transform: translateY(28px);
+      transform: translateY(25px);
       transition: opacity 0.75s var(--ease), transform 0.75s var(--ease);
       transition-delay: var(--d, 0s);
     }
@@ -1924,3 +1957,6 @@ if (contactForm) {
     }
   });
 }
+</script>
+</body>
+</html>
