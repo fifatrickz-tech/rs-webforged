@@ -71,7 +71,7 @@ export default async function handler(req, res) {
 
     const emailResult = await resend.emails.send({
       from: 'RS WebForged <onboarding@resend.dev>',
-      to: ['rs.webforged@gmail.com'],
+      to: ['fifatrickz@outlook.com'],
       replyTo: email,
       subject: `New website enquiry from ${business.trim() || name.trim()}`,
       html: `
