@@ -274,12 +274,8 @@
   .nav-toggle {
     display: flex;
   }
-.site-nav .nav-cta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
 
+  
   .site-nav {
     position: fixed;
     top: 72px;
@@ -1324,8 +1320,8 @@ body.menu-open {
 
     /* ─── SCROLL REVEAL ─────────────────────────── */
     .reveal {
-      opacity: 1;
-      transform: translateY(0);
+      opacity: 0;
+      transform: translateY(25px);
       transition: opacity 0.75s var(--ease), transform 0.75s var(--ease);
       transition-delay: var(--d, 0s);
     }
