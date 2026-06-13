@@ -24,13 +24,10 @@ export default async function handler(req, res) {
       email = '',
       website = '',
       message = '',
-      company = ''
+      company = '',
     } = body;
 
-    const turnstileToken =
-      body['cf-turnstile-response'] ||
-      body.turnstileToken ||
-      '';
+    const turnstileToken = body['cf-turnstile-response'] || body.turnstileToken || '';
 
     if (company) {
       return res.status(200).json({ success: true });
@@ -53,13 +50,12 @@ export default async function handler(req, res) {
       {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
           secret: process.env.TURNSTILE_SECRET_KEY,
           response: turnstileToken,
-          remoteip: getClientIp(req)
-        })
+        }),
       }
     );
 
@@ -69,39 +65,23 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: 'Security check failed. Please try again.' });
     }
 
-    const emailResult = await resend.emails.send({
-      from: 'RS WebForged <onboarding@resend.dev>',
-      to: ['fifatrickz@outlook.com'],
+    const { data, error } = await resend.emails.send({
+      from: process.env.FROM_EMAIL || 'RS WebForged <onboarding@resend.dev>',
+      to: [process.env.TO_EMAIL || 'fifatrickz@outlook.com'],
       replyTo: email,
       subject: `New website enquiry from ${business.trim() || name.trim()}`,
-      html: `
-        <div style="font-family:Arial,sans-serif;max-width:620px;line-height:1.6;color:#111;">
-          <h2>New RS WebForged enquiry</h2>
-          <p><strong>Name:</strong> ${escapeHtml(name)}</p>
-          <p><strong>Business:</strong> ${escapeHtml(business || 'Not provided')}</p>
-          <p><strong>Email:</strong> ${escapeHtml(email)}</p>
-          <p><strong>Website:</strong> ${escapeHtml(website || 'Not provided')}</p>
-          <hr>
-          <p><strong>Message:</strong></p>
-          <p>${escapeHtml(message).replace(/\n/g, '<br>')}</p>
-        </div>
-      `,
-      text: `
-New RS WebForged enquiry
-
-Name: ${name}
-Business: ${business || 'Not provided'}
-Email: ${email}
-Website: ${website || 'Not provided'}
-
-Message:
-${message}
-      `.trim()
+      html: buildEmailHtml({ name, business, email, website, message }),
+      text: buildEmailText({ name, business, email, website, message }),
     });
+
+    if (error) {
+      console.error('Resend error:', error);
+      return res.status(500).json({ error: error.message || 'Email failed to send.' });
+    }
 
     return res.status(200).json({
       success: true,
-      emailId: emailResult.data?.id || null
+      emailId: data?.id || null,
     });
   } catch (error) {
     console.error('Contact form error:', error);
@@ -113,12 +93,33 @@ function isValidEmail(value = '') {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value).trim());
 }
 
-function getClientIp(req) {
-  const forwardedFor = req.headers['x-forwarded-for'];
-  if (typeof forwardedFor === 'string') {
-    return forwardedFor.split(',')[0].trim();
-  }
-  return req.socket?.remoteAddress || '';
+function buildEmailHtml({ name, business, email, website, message }) {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 640px; line-height: 1.6; color: #111;">
+      <h2>New RS WebForged enquiry</h2>
+      <p><strong>Name:</strong> ${escapeHtml(name)}</p>
+      <p><strong>Business:</strong> ${escapeHtml(business || 'Not provided')}</p>
+      <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+      <p><strong>Website:</strong> ${escapeHtml(website || 'Not provided')}</p>
+      <hr>
+      <p><strong>Message:</strong></p>
+      <p>${escapeHtml(message).replace(/\n/g, '<br>')}</p>
+    </div>
+  `;
+}
+
+function buildEmailText({ name, business, email, website, message }) {
+  return `
+New RS WebForged enquiry
+
+Name: ${name}
+Business: ${business || 'Not provided'}
+Email: ${email}
+Website: ${website || 'Not provided'}
+
+Message:
+${message}
+  `.trim();
 }
 
 function escapeHtml(value = '') {
